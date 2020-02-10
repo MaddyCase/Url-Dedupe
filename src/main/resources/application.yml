@@ -1,0 +1,21 @@
+# All environments
+spring:
+  application:
+    name: url-dedupe
+  h2:
+    console:
+      enabled: true # Enabling H2 Console - http://localhost:8080/h2-console
+  datasource:
+    url: jdbc:h2:mem:url-dedupe
+    driverClassName: org.h2.Driver
+    username: happyDoggo
+    password: sadDoggo
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        show_sql: true
+        use_sql_comments: true
+        format_sql: true
