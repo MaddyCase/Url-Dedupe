@@ -3,26 +3,38 @@ package com.urldedupe.service;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import java.io.*;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @Slf4j
 public class UrlFileReader {
 
-    private static final Integer SET_CAPACITY = 100;
-    private static final String FILE_BASE = "./urlFiles/";
+    private static final Integer SET_CAPACITY = 1000000;
+    private static final String BASE_FILE_DIR = "./urlFiles/";
 
-    public Set<String> getUrls(@NonNull final String fileName) throws IOException {
-        Set<String> setOfUrls = new HashSet<>(SET_CAPACITY);
-        try (BufferedReader br = new BufferedReader(new FileReader( FILE_BASE + fileName))) {
-            setOfUrls.add(br.readLine().trim());
+    /**
+     * Retrieves all files in the particular directory name. Note this this directory must live within urlFiles.
+     * If the file directory is not found, we return an empty list
+     *
+     * @param dirname
+     * @return
+     */
+    public List<File> getFiles(@NonNull final String dirname) {
+        File dir = new File(BASE_FILE_DIR + dirname);
+        File[] files = dir.listFiles();
+        return files != null ?
+               Arrays.asList(files) :
+               Collections.emptyList();
+    }
+
+    public Set<String> getUrls(@NonNull final File file) throws IOException {
+        Set<String> setOfUrls = new HashSet<>(SET_CAPACITY); // Note that we are assuming that clients have always sent over the correct capacity that we required
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = br.readLine()) != null) {
-                setOfUrls.add(StringUtils.trimWhitespace(line));
+                setOfUrls.add(line.trim());
             }
         }
         return setOfUrls;
