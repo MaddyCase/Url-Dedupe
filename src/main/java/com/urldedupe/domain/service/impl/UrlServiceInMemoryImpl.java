@@ -1,5 +1,8 @@
-package com.urldedupe.domain.service;
+package com.urldedupe.domain.service.impl;
 
+import com.urldedupe.domain.service.UrlService;
+import com.urldedupe.domain.Url;
+import com.urldedupe.domain.repository.UrlRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -28,10 +31,8 @@ public class UrlServiceInMemoryImpl implements UrlService {
     }
 
     @Override
-    public List<String> findAll() {
-        return mUrlRepository.findAll().stream()
-                             .map(Url::getUrl)
-                             .collect(Collectors.toList());
+    public List<Url> findAll() {
+        return mUrlRepository.findAll();
     }
 
     private void save(final String url) {

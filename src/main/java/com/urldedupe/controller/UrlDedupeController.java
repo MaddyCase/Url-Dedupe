@@ -2,6 +2,7 @@ package com.urldedupe.controller;
 
 import com.urldedupe.domain.service.UrlService;
 import com.urldedupe.service.UrlFileReader;
+import com.urldedupe.view.UrlView;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -31,9 +32,24 @@ public class UrlDedupeController {
         mUrlFileReader = urlFileReader;
     }
 
+    /**
+     * Dedupes all urls that are within all files within the given directory.
+     *
+     * Requirements:
+     * dirname must exist within urlFiles
+     * Any number of Files may exist within your chosen dirname
+     *
+     * Each File Must:
+     * - Have no more than 1000000 urls
+     * - Be a csv Format
+     * - Have one and only one url on each line, with no deliminators
+     *
+     * @param dirname
+     * @return
+     */
     @GetMapping(path = "/{dirname}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity create(@PathVariable("dirname") final String dirname) {
-        long startTime = System.nanoTime(); // in nanoseconds
+        long startTime = System.currentTimeMillis();
         try {
             mUrlFileReader.getFiles(dirname)
                           .parallelStream()
@@ -48,31 +64,39 @@ public class UrlDedupeController {
         }
     }
 
+    /**
+     * Retrieves all Urls that we have determined to be unique.
+     *
+     * Note that this currently only works for smaller in memory subsets. Plans for further improvement on this can be seen in the ReadMe
+     * @return
+     */
+    @GetMapping(path = "/", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<UrlView> get() {
+        long startTime = System.currentTimeMillis();
+        try {
+            UrlView urlView = UrlView.builder()
+                                     .urls(mUrlService.findAll())
+                                     .build();
+            return ResponseEntity.ok().body(urlView);
+        } catch (Exception e) {
+            log.error("Error occurred while attempting to retrieve urls", e);
+            return ResponseEntity.badRequest()
+                                 .body(UrlView.builder()
+                                              .build());
+        }
+    }
+
     private void processFile(final File file) {
         try {
             Set<String> urls = mUrlFileReader.getUrls(file);
-            // Once we have the Set, lets save it all with the Service
             mUrlService.saveAll(urls);
         } catch (Exception e) {
             log.error("Unable to process file: {}", file.getName(), e);
         }
-
-    }
-
-    @GetMapping(path = "/", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity get() {
-        try {
-            return ResponseEntity.ok("Urls: " + mUrlService.findAll());
-        } catch (Exception e) {
-            log.error("Error occurred while attempting to retrieve urls", e);
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Unable to retrieve urls");
-        }
     }
 
     private long getTimeElapsed(final long startTime) {
-        long endTime = System.nanoTime();
+        long endTime = System.currentTimeMillis();
         return endTime - startTime;
     }
 }

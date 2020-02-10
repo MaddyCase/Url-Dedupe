@@ -1,5 +1,7 @@
-package com.urldedupe.domain.service;
+package com.urldedupe.domain.service.impl;
 
+import com.urldedupe.domain.Url;
+import com.urldedupe.domain.service.UrlService;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +26,7 @@ public class UrlServiceImpl implements UrlService {
     }
 
     @Override
-    public List<String> findAll() {
+    public List<Url> findAll() {
         throw new NotImplementedException();
     }
 }

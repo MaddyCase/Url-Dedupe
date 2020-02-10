@@ -1,5 +1,6 @@
-package com.urldedupe.domain.service;
+package com.urldedupe.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,6 +18,7 @@ public class Url {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonIgnore
     private Long id;
 
     @Column(nullable = false, unique = true, length = 8000, updatable = false)
