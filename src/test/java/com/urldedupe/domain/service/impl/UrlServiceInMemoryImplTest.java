@@ -13,7 +13,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import java.util.Collections;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -69,6 +69,5 @@ class UrlServiceInMemoryImplTest {
                       .url(url)
                       .build();
         }
-
     }
 }
