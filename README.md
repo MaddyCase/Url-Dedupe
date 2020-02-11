@@ -24,6 +24,14 @@ Use "File > New > Project from existing sources."
 Then use "Import project from existing model > Maven."
 ```
 
+
+### Running Tests
+From the command-line:
+
+```
+mvn tests
+```
+
 ### Additional Resources:
 
 - [V1 Walkthrough](docs/V1Walkthrough.md)

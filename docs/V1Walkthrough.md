@@ -30,7 +30,7 @@ shared data storage. Because of that preference, I opted to not strategize furth
 I wanted to supply _some_ flexibility for users to test varying datasets, but I didn't want it to be a pain to run the jobs, either. Having it setup this way
 simply allows for people evaluating the system to have more flexibility in testing!
 
-#### _Each file must have roughly `50,000` urls within it._
+#### _Each file should have roughly `50,000` urls within it._
 
 To be honest... 50,000 is a made up number. It felt realistic to run within my current implementation, and also large enough to begin getting some good
 time readings. The interesting thing is that since I'm running this on my own computer... I have a limited amount of threads that I can utilize. So 
@@ -64,16 +64,24 @@ http://localhost:8080/h2-console
 
 Flow:
 - Application starts, initializes the `urls` h2 db table
+
 - Client saves files containing urls to be deduped within designated location.
+
 - Job is triggered (in our case, just via a Restful API)
+
 - File reader scans directory for list of Files within that directory.
+
 - Java Parallel Stream is then used to read through each file in a parallel manner.
+
 - After each file read, a `Set` of Strings is created. 
   - `Set` was chosen because it does not allow for duplicates, so a simple and quick insert works fluidly.
+  
 - Then that `Set` of String urls is sent to the `UrlService` to be saved. This is also done via java's `parallelstream` API.
   - Note that in the current design, it is expected to run into some (or many) Unique index/ primary key violations when saving to the db.
   I determined for now that this strategy is okay since our end result is achieved without additional querying, or blocking mechanisms i.e., it saves time.
+  
 - At the end of the process all urls within the database are deduped! 
+
 - Once application is terminated, database is also dropped.
 
 
@@ -89,7 +97,8 @@ Running the Dedupe Application:
 - Query your result via the H2 console. http://localhost:8080/h2-console
 
 ## How much time and space your solution will take to execute.
-Memory:
+<b>Memory:</b>
+
 Although the memory usage of the H2 Db is significant, my implementation only uses H2 as a stand in for a real deployed database. This POC is for ease of portability, so because
 of that, a real solution would be utilizing disk space... which for the problem is assumed to be unlimited.
 
@@ -98,21 +107,36 @@ As such, I will focus my discussion of space to just the memory concerns of my a
 Foremost, all objects and their references instantiated within the course of my solution can be treated as constant space requirements.
 Regardless of the size of the input, the only detail that scales in memory usage to that is the Set of urls.
 The largest possible size for the Set will be equal to the largest number of urls within a single File that I'm reading in. So if my file size is N, then my in memory space will
-be at most N.  Since all other objects are constant in memory usage, my Overall Big O space complexity is N.
+be at most N.Since all other objects are constant in memory usage, my Overall Big O space complexity is N.
+
+
+<b>Time:</b>
 
 Total Runtime:
-Best case scenario -> All urls are duplicates. Avg time roughly 80 minutes for 1 billion urls.
+Best case scenario -> All urls are duplicates. Avg time estimate: roughly 8.6 minutes for 1 billion urls.
+Worst case scenario -> No urls are duplicates. Avg time estimate: roughly 2 hours for 1 billion urls.
 
 Math for best case:
 ```
 See test dir: allRepeats10Files
-Avg of 240 ms for 10 files of size 10,000 with no duplicates
-1 billion divided by 10,000 urls equals 20,000
-20,000 x 240 milliseconds = roughly 80 minutes
+Avg of 260 ms for 10 files of size 50,000 with no duplicates
+50,000 urls x 10 files = 500,000 urls processed
+1 billion divided by 500,000 urls equals 2,000
+2,000 x 260 milliseconds = roughly 8.6 minutes
 
-Hypothesis that were this a Distributed System, even with the inclusion of one additional instance... we could cut that down to 40 minutes... with even
-faster dedupe times with more instances workin' together.
 ```
+
+Math for worst case:
+```
+See test dir: noRepeats10Files
+Avg of 33627 ms for 10 files of size 50,000 with all duplicates
+50,000 urls x 10 files = 500,000 urls processed
+1 billion divided by 500,000 urls equals 2,000
+2,000 x 33627 milliseconds = roughly 2 hours
+
+```
+
+Note that in both cases, a distributed system could drastically cut process time.
 
 ## A testing approach.
 Testing for performance. *phew* talk about a challenging task! Particularly in my V1 approach...
@@ -127,15 +151,26 @@ For all runs: Grab average after say... 50 runs.
 3 - 10 files, 50,000 in each. Half Duplicates
 4 - No Files at all
 5 - Empty File
+6 - A file with crazy long url sizes, and more unique characters
 ```
+
+Further testing would involve monitoring this system in a production setting. Whether that be through dashboards giving insight into
+what is going on, monitoring logs themselves, or setting up alerting systems. As well as running some time trials against other methods that either
+my team produced, or that I produced (with some additional time, of course! haha)
 
 ## Next Steps for V2
 Jira story titles that I might write out were I to turn this into a production ready application.
 
 1 - Spike out what the top Database would be for this use case (Considering company needs/costs/etc)
+
 2 - Modify Implementation to utilize new Database Schema
-3 - Create a Lightweight Read Endpoint that Cursors through the DB (something like: https://www.postgresqltutorial.com/plpgsql-cursor/ )
+
+3 - Create a Lightweight Read Endpoint that Cursors through the DB (using something speedy like: https://www.postgresqltutorial.com/plpgsql-cursor/ )
+
 3 - Improve Error Handling / Introduce Rollback Strategies
-4 - Deploy this Application to its own Cloud Instance (likely AWS EC2)
+
+4 - Deploy this Application to the Cloud (likely AWS EC2)
+
 5 - Spike on the best Log Aggregator to utilize for APM type monitoring/ dashboards/ etc... and the implement
-6 - Create multiple Instances to share the workload!:D
+
+6 - Deploy Application as a cluster to share the workload!:D
