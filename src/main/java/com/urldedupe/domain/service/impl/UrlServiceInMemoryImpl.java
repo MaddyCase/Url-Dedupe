@@ -3,6 +3,7 @@ package com.urldedupe.domain.service.impl;
 import com.urldedupe.domain.service.UrlService;
 import com.urldedupe.domain.Url;
 import com.urldedupe.domain.repository.UrlRepository;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -24,7 +25,7 @@ public class UrlServiceInMemoryImpl implements UrlService {
     }
 
     @Override
-    public void saveAll(final Set<String> urls) {
+    public void saveAll(@NonNull final Set<String> urls) {
         urls.parallelStream().forEach(this::save);
     }
 
