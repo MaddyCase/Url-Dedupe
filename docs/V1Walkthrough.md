@@ -82,6 +82,10 @@ Running the Dedupe Application:
 - Run the Application! See the `README` section for help getting started.
 - Store Files that you'd like to test against (or use existing directory -- see the section on `Chosen Input Format` for more details)
 - Run a GET on `http://localhost:8080/urldedupe/{yourDirNameHere}`
+  - Working examples: 
+  - http://localhost:8080/urldedupe/allRepeats10Files
+  - http://localhost:8080/urldedupe/mostlyrepeatsonefile
+  - http://localhost:8080/urldedupe/noRepeats10Files
 - Query your result via the H2 console. http://localhost:8080/h2-console
 
 ## How much time and space your solution will take to execute.
