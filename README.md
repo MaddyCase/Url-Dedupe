@@ -24,7 +24,6 @@ Use "File > New > Project from existing sources."
 Then use "Import project from existing model > Maven."
 ```
 
-
 ### Additional Resources:
 
 - [V1 Walkthrough](docs/V1Walkthrough.md)
