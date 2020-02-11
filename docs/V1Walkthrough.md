@@ -10,47 +10,46 @@ So here's to listening in on some of my initial thoughts!
 ## Chosen Input Format
 - Any number of files that are stored within a directory of a users choosing
 - Directory must be located within the `urlFiles` directory
-- Each file must `50,000` urls within it.
-- URLS must be written one per line, with no deliminators.
+- Each file should have around `50,000` urls within it (at least in the POC version)
+- urls must be written one per line, with no deliminators.
 
 ![see visual here](images/url-files-location.png)
  
-##### Any number of files that are stored within a directory of a users choosing
+#### _Any number of files that are stored within a directory of a users choosing_
 
-Interesting choice, right?XD Well initially I considered having on massive File that was saved in a similar location and format. The problem then was
+Interesting choice, right?XD Well initially I considered having one massive File that was saved in a similar location and format. The problem then was
 that I'd have to parse through that _entire_ file in order to split it up into easer-to-deal-with "chunks". However, after considering how that could possibly
 be undertaken further, I realized that whoever the client was _had_ to write that billion url file at some point either way. So why not request that my client
 parse them into separate files from the get go? It seemed like the winning strategy to save us both time!
 
 Additionally, I did not want to send the data over the wire. My preferred architecture would be reading these values gradually off of some sort of MQ, or even just from a 
-shared data storage. Because of that preference, I opted to not strategize further on how to send this massive content over the wire (for the MVP).
+shared data storage. Because of that preference, I opted to not strategize further on how to send this massive content over the wire (for the POC).
 
-##### Directory must be located within the `urlFiles` directory
+#### _Directory must be located within the `urlFiles` directory_
 
 I wanted to supply _some_ flexibility for users to test varying datasets, but I didn't want it to be a pain to run the jobs, either. Having it setup this way
 simply allows for people evaluating the system to have more flexibility in testing!
 
-##### Each file must have no more than `50,000` urls within it.
+#### _Each file must have roughly `50,000` urls within it._
 
 To be honest... 50,000 is a made up number. It felt realistic to run within my current implementation, and also large enough to begin getting some good
 time readings. The interesting thing is that since I'm running this on my own computer... I have a limited amount of threads that I can utilize. So 
 splitting it up more or less than this 50,000 number doesn't seem to have _that_ much of an effect that I can readily quantify.
 
-I am more than open to learning more about this and whether there is a better approach for choosing this "chunk" amount!
-
-##### URLS must be written one per line, with no deliminators.
+My guess is that this number would be way more fun to play with in a distributed system type architecture. Although I'd be excited to hear cases I'm not considering!
+#### _URLS must be written one per line, with no deliminators._
 
 Reading these massive files is time consuming enough, so I opted to avoid any need to undergo additional parsing within the files through requiring that each line has one and only
-one thing... the url! :dancingcat:
+one thing... the url! #savingcomputingtime
 
 ## Chosen Output Format:
 
-I opted to place the output within a database table; specifically for the POC I'm simply storing the unique urls within an H2 in memory database table.
+I opted to place the output within a database table; specifically for the POC I'm simply storing the unique urls within an H2 in-memory database table.
  
 I did this POC because I'd prefer a final result to resemble a Distributed System with a Shared DataStore as opposed to a file system or simply a single
-file which is output later on. Placing it in a DB storage earlier rather than later, _often_ could allow for an ease of usage down the line.
+file which is output after running. Placing it in a DB storage earlier rather than later, _often_ could allow for an ease of usage down the line.
 
-(I also didn't spin up a new DB instance because I wasn't willing to throw down the cost for spinning one up in AWS haha)
+(I also didn't spin up a new DB instance because I ran out of free credits on AWS a while ago... O_O haha)
 
 The POC solution can be seen by hitting this url when your application is running, and after you've successfully ran the dedupe job. The creds for login
 can be found within this project's `application.yml` file.
@@ -64,7 +63,7 @@ http://localhost:8080/h2-console
 ## How does this application work??
 
 Flow:
-- Application starts, initializes the urls database
+- Application starts, initializes the `urls` h2 db table
 - Client saves files containing urls to be deduped within designated location.
 - Job is triggered (in our case, just via a Restful API)
 - File reader scans directory for list of Files within that directory.
@@ -72,9 +71,8 @@ Flow:
 - After each file read, a `Set` of Strings is created. 
   - `Set` was chosen because it does not allow for duplicates, so a simple and quick insert works fluidly.
 - Then that `Set` of String urls is sent to the `UrlService` to be saved. This is also done via java's `parallelstream` API.
-  - Note that all items in the Set are saved in the DB in a manner which is parallel to various other saves that could be going on (since we are
-  within a parallel stream with possibly another File or two in process). Because of this, it is expected to run into some (or many) Unique index/ primary key violations.
-  I determined for now that this strategy is okay since our end result is achieved without additional querying, i.e., a time saver.
+  - Note that in the current design, it is expected to run into some (or many) Unique index/ primary key violations when saving to the db.
+  I determined for now that this strategy is okay since our end result is achieved without additional querying, or blocking mechanisms i.e., it saves time.
 - At the end of the process all urls within the database are deduped! 
 - Once application is terminated, database is also dropped.
 
@@ -84,7 +82,8 @@ Running the Dedupe Application:
 - Run the Application! See the `README` section for help getting started.
 - Store Files that you'd like to test against (or use existing directory -- see the section on `Chosen Input Format` for more details)
 - Run a GET on `http://localhost:8080/urldedupe/{yourDirNameHere}`
- 
+- Query your result via the H2 console. http://localhost:8080/h2-console
+
 ## How much time and space your solution will take to execute.
 Memory:
 My approach takes a _lot_ of memory. Primarly because of my usage of an H2 in memory database.... and one with a VARCHAR length that is Integer.MAX_INTEGER at that haha
@@ -123,6 +122,7 @@ Jira story titles that I might write out were I to turn this into a production r
 
 1 - Spike out what the top Database would be for this use case (Considering company needs/costs/etc)
 2 - Modify Implementation to utilize new Database Schema
+3 - Create a Lightweight Read Endpoint that Cursors through the DB (something like: https://www.postgresqltutorial.com/plpgsql-cursor/ )
 3 - Improve Error Handling / Introduce Rollback Strategies
 4 - Deploy this Application to its own Cloud Instance (likely AWS EC2)
 5 - Spike on the best Log Aggregator to utilize for APM type monitoring/ dashboards/ etc... and the implement

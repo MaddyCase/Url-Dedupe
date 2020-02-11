@@ -41,7 +41,7 @@ public class UrlServiceInMemoryImpl implements UrlService {
                                    .build()
             );
         } catch (DataIntegrityViolationException e) {
-            // do nothing since this is an anticipated case
+            // do nothing since this is an anticipated case when running parallel streams
         } catch (Exception e) {
             log.error("Unexpected error occurred when attempting to save url: {}", url);
         }

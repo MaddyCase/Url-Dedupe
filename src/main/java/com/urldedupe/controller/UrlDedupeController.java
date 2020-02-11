@@ -39,7 +39,8 @@ public class UrlDedupeController {
      * Any number of Files may exist within your chosen dirname
      *
      * Each File Must:
-     * - Recommended url size of 100,000 urls
+     * - Recommended file size of 50,000 urls
+     * - Keep all file sizes roughly the same for best processing times
      * - Have one and only one url on each line, with no deliminators
      *
      * @param dirname
