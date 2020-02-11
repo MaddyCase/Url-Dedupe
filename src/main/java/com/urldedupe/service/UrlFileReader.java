@@ -11,7 +11,6 @@ import java.util.*;
 @Slf4j
 public class UrlFileReader {
 
-    private static final Integer SET_CAPACITY = 100000;
     private static final String BASE_FILE_DIR = "./urlFiles/";
 
     /**
@@ -30,7 +29,7 @@ public class UrlFileReader {
     }
 
     public Set<String> getUrls(@NonNull final File file) throws IOException {
-        Set<String> setOfUrls = new HashSet<>(SET_CAPACITY); // Note that we are assuming that clients have always sent over the correct capacity that we required
+        Set<String> setOfUrls = new HashSet<>();
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = br.readLine()) != null) {
