@@ -86,10 +86,18 @@ Running the Dedupe Application:
 
 ## How much time and space your solution will take to execute.
 Memory:
-My approach takes a _lot_ of memory. Primarly because of my usage of an H2 in memory database.... and one with a VARCHAR length that is Integer.MAX_INTEGER at that haha
+Although the memory usage of the H2 Db is significant, my implementation only uses H2 as a stand in for a real deployed database. This POC is for ease of portability, so because
+of that, a real solution would be utilizing disk space... which for the problem is assumed to be unlimited.
+
+As such, I will focus my discussion of space to just the memory concerns of my algorithm.
+
+Foremost, all objects and their references instantiated within the course of my solution can be treated as constant space requirements.
+Regardless of the size of the input, the only detail that scales in memory usage to that is the Set of urls.
+The largest possible size for the Set will be equal to the largest number of urls within a single File that I'm reading in. So if my file size is N, then my in memory space will
+be at most N.  Since all other objects are constant in memory usage, my Overall Big O space complexity is N.
 
 Total Runtime:
-Best case scenario -> All urls are duplicates. Avg time roughtly 80 minutes for 1 billion urls
+Best case scenario -> All urls are duplicates. Avg time roughly 80 minutes for 1 billion urls.
 
 Math for best case:
 ```

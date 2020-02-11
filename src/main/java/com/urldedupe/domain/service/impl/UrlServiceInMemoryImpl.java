@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Set;
 
 @Service
@@ -29,11 +28,6 @@ public class UrlServiceInMemoryImpl implements UrlService {
         urls.parallelStream().forEach(this::save);
     }
 
-    @Override
-    public List<Url> findAll() {
-        return mUrlRepository.findAll();
-    }
-
     private void save(final String url) {
         try {
             mUrlRepository.save(Url.builder()
@@ -43,7 +37,7 @@ public class UrlServiceInMemoryImpl implements UrlService {
         } catch (DataIntegrityViolationException e) {
             // do nothing since this is an anticipated case when running parallel streams
         } catch (Exception e) {
-            log.error("Unexpected error occurred when attempting to save url: {}", url);
+            log.error("Unexpected error occurred when attempting to save url: {}", url, e);
         }
     }
 }
