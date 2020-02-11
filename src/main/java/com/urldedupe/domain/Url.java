@@ -21,6 +21,6 @@ public class Url {
     @JsonIgnore
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 8000, updatable = false)
+    @Column(nullable = false, unique = true, length = Integer.MAX_VALUE, updatable = false)
     private String url;
 }

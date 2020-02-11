@@ -2,7 +2,6 @@ package com.urldedupe.controller;
 
 import com.urldedupe.domain.service.UrlService;
 import com.urldedupe.service.UrlFileReader;
-import com.urldedupe.view.UrlView;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -40,8 +39,7 @@ public class UrlDedupeController {
      * Any number of Files may exist within your chosen dirname
      *
      * Each File Must:
-     * - Have no more than 1000000 urls
-     * - Be a csv Format
+     * - Recommended url size of 100,000 urls
      * - Have one and only one url on each line, with no deliminators
      *
      * @param dirname
@@ -61,28 +59,6 @@ public class UrlDedupeController {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Unable to dedupe urls for dirName: " + dirname);
-        }
-    }
-
-    /**
-     * Retrieves all Urls that we have determined to be unique.
-     *
-     * Note that this currently only works for smaller in memory subsets. Plans for further improvement on this can be seen in the ReadMe
-     * @return
-     */
-    @GetMapping(path = "/", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<UrlView> get() {
-        long startTime = System.currentTimeMillis();
-        try {
-            UrlView urlView = UrlView.builder()
-                                     .urls(mUrlService.findAll())
-                                     .build();
-            return ResponseEntity.ok().body(urlView);
-        } catch (Exception e) {
-            log.error("Error occurred while attempting to retrieve urls", e);
-            return ResponseEntity.badRequest()
-                                 .body(UrlView.builder()
-                                              .build());
         }
     }
 

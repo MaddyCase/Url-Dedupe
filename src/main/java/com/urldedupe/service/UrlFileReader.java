@@ -11,7 +11,7 @@ import java.util.*;
 @Slf4j
 public class UrlFileReader {
 
-    private static final Integer SET_CAPACITY = 1000000;
+    private static final Integer SET_CAPACITY = 100000;
     private static final String BASE_FILE_DIR = "./urlFiles/";
 
     /**
