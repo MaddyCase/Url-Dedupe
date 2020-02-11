@@ -24,6 +24,7 @@ import static org.mockito.Mockito.verify;
 public class UrlDedupeControllerTest {
 
     UrlDedupeController controller;
+
     @Mock
     private UrlService mockUrlService;
     @Mock
